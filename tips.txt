@@ -1,2 +1,67 @@
 # info
-Lessons learned in the field
+Unix
+
+Command Line
+
+Finding files within a range
+
+touch -t yyyymmddHHMM range_start
+touch -t yyyymmddHHMM range_end
+find . -type f -newer range_start ! -newer range_end
+
+Hex dumps (and back again)
+
+xxd 
+
+The following command will create a hexdump of <file>:
+
+xxd <file>
+
+Most importantly, this command will take a rough hexdump and write it into a binary file:
+
+xxd -r -p <dump> <output>
+
+A good example of this might be to take a hex dump like this:
+
+0000000: 74 78 69 73 20 69 73 20 61 20 74 65 73 74 21 0a
+
+or:
+
+0000000 74 78 69 73 20 69 73 20 61 20 74 65 73 74 21 0a
+
+or even: 
+
+74 78 69 73 20 69 73 20 61 20 74 65 73 74 21 0a
+
+written into a file called testxxd.txt (for example), and using the reverse mode on xxd:
+
+xxd -r -p testxxd.txt testxxd.out
+
+to produce a file with this output:
+
+this is a test!
+
+Performing byte manipulation of files
+
+dd if=<infile> of=<outfile> bs=<blocksize> skip=<blocks to skip> count=<blocks to output>
+
+Sending files from a find into a tar file
+
+find . <qualifiers> | xargs tar rvf "<tarfile>"
+
+Optionally:
+
+find . <qualifiers> | xargs tar rvf "<tarfile>" | rm -fv
+
+Renaming files via find
+
+I had the case where I wanted to select among different versions of a particular file, each of which was suffixed with some unique token and the version number. I then wanted to rip through a directory structure, with a selected version in-hand and strip the token/version from the files, thereby making them usable by the system. I cam to the following line, which was used in a shell script (minimized to strip project details away):
+
+find ${theDirectory} -type f -name "*.<token>.${theVersion}" -exec sh -c "mv {} \`echo {} | sed -e 's/.<token>.${theVersion}//'\`" \;
+
+Generating random values for file names, etc
+
+The /dev/random device is a reasonable source of random tokens for use with temporary file names, etc.
+
+od -An -N<number of bytes for token> -x /dev/random | sed 's/\s//g'
+
